@@ -1,0 +1,20 @@
+Package: minimage
+Type: Package
+Title: An R Interface to the 'compress-images' Software
+Version: 0.0.1
+Authors@R: c(
+    person("David", "Gohel", role = c("aut", "cre"),
+    email = "david.gohel@ardata.fr")
+    )
+Description: Minify size images with extensions: 'jpg/jpeg', 'svg', 'png' and 'gif'. 
+ The main function allows to compress the images contained in a directory to another 
+ directory, optionally changing some compression parameters.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: R (>= 4.0.0)
+Imports: tools, locatexec
+SystemRequirements: Node.js
+Remotes: ardata-fr/locatexec

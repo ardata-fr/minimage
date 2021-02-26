@@ -1,0 +1,59 @@
+---
+output: 
+  github_document:
+    df_print: kable
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+library(knitr)
+opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# minimage
+
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/ardata-fr/minimage/workflows/R-CMD-check/badge.svg)](https://github.com/ardata-fr/minimage/actions)
+<!-- badges: end -->
+
+The goal of minimage is to ket users minify size images.
+
+The main function allows to compress the images contained in a directory to another 
+directory, optionally changing some compression parameters.
+
+## Installation
+
+You can install minimage from [GitHub](https://github.com/ardata-fr/minimage/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("ardata-fr/minimage")
+```
+## Example
+
+```{r include=FALSE}
+file.copy(system.file(package = "minimage", "test-files"), to = ".", recursive = TRUE)
+dir.create("test-new-files", recursive = TRUE)
+```
+
+
+```{r example}
+library(minimage)
+compress_images("test-files/", "test-new-files/", verbose = FALSE)
+compress_images("test-files/", "test-new-files/", png_quality = "90-100", 
+                verbose = FALSE, overwrite = TRUE)
+```
+
+
+```{r include=FALSE}
+unlink("test-files", force = TRUE, recursive = TRUE)
+unlink("test-new-files", force = TRUE, recursive = TRUE)
+```
+
