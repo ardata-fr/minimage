@@ -48,7 +48,8 @@ compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FA
                             jpg_quality = "75", png_quality = "20-50", gif_colors = "64"){
 
   compimg_dir <- working_directory()
-
+  if(!compress_images_available())
+    stop("compress-images is not available, run `compress_images_install()` to install it.")
   if(substr(output, nchar(output), nchar(output) ) != "/") {
     output <- paste0(output, "/")
   }

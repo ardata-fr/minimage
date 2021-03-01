@@ -23,7 +23,7 @@ opts_chunk$set(
 [![R-CMD-check](https://github.com/ardata-fr/minimage/workflows/R-CMD-check/badge.svg)](https://github.com/ardata-fr/minimage/actions)
 <!-- badges: end -->
 
-The goal of minimage is to ket users minify size images.
+The goal of minimage is to let users minify size images.
 
 The main function allows to compress the images contained in a directory to another 
 directory, optionally changing some compression parameters.
