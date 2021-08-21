@@ -44,10 +44,18 @@
 #'
 #' }
 #' @return a data.frame with details about input files and compressed files.
-compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FALSE,
+compress_images <- function(input, output = NULL,
+                            verbose = TRUE, overwrite = FALSE,
                             jpg_quality = "75", png_quality = "20-50", gif_colors = "64"){
 
-  compimg_dir <- working_directory()
+  if(!dir.exists(input)){
+    stop(shQuote(input), " does not exist")
+  }
+  if(!dir.exists(output)){
+    stop(shQuote(output), " does not exist")
+  }
+
+  compimg_dir <- get_minimage_defaults()$wd
   if(!compress_images_available())
     stop("compress-images is not available, run `compress_images_install()` to install it.")
   if(substr(output, nchar(output), nchar(output) ) != "/") {
@@ -63,12 +71,6 @@ compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FA
   output <- paste0(absolute_path(output), "/")
   input <- paste0(absolute_path(input), "/")
 
-  if(!dir.exists(input)){
-    stop(shQuote(input), " does not exist")
-  }
-  if(!dir.exists(output)){
-    stop(shQuote(output), " does not exist")
-  }
   exec_available("node", error = TRUE)
   exec_available("npm", error = TRUE)
 
@@ -91,6 +93,7 @@ compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FA
 
   curr_wd <- getwd()
   setwd(compimg_dir)
+
   tryCatch({
     info <-
       system2(
@@ -116,25 +119,29 @@ compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FA
     setwd(curr_wd)
   })
 
+  if(success) {
+    success <- all(info[grep("## error", info, fixed = TRUE) + 1] %in% "null")
+  }
+
+  if(!success){
+    msg <- paste0(extract_errors(info) , collapse = "\n")
+  }
+  if(verbose && !success){
+    message("#> something wrong happen :\n")
+    message(msg)
+  }
+
   # ----
   log_files <- list.files(path_log, full.names = TRUE)
-  if(verbose && length(log_files)>0) {
+  if(success && verbose && length(log_files)>0) {
     log_str <- lapply(log_files, readLines)
     log_str <- vapply(log_str, paste0, FUN.VALUE = "", collapse = "\n")
     log_str <- paste0(log_str , collapse = "\n-------------\n")
     success <- FALSE
     message(log_str)
     out <- process_data()
-  } else if(!is.null(info)) {
-    out <- mapply(
-      FUN = process_log,
-      start = which(info %in% "{"),
-      end = which(info %in% "}"),
-      MoreArgs = list(txt = info),
-      SIMPLIFY = FALSE)
-    out <- Filter(is.data.frame, out)
-    out$stringsAsFactors <- FALSE
-    out <- do.call(rbind, out)
+  } else if(success && !is.null(info)) {
+    out <- extract_statistics(info)
   } else {
     success <- FALSE
     if(verbose) message("unknown error on operation")
@@ -156,7 +163,12 @@ compress_images <- function(input, output = NULL, verbose = TRUE, overwrite = FA
   out$input <- gsub(input, init_input, out$input, fixed = TRUE)
 
   attr(out, "success") <- success
-  if(verbose) message("#> all images have been treated with no issue: ", success)
+
+  if(verbose && success) {
+    message("#> all images have been treated with no issue")
+  } else if(verbose && !success) {
+    message("#> something went with an error or a warning, see logs upper")
+  }
 
   out
 }
@@ -171,6 +183,37 @@ extract_num <- function(txt, reg_marker){
   input <- txt[grepl(reg_marker, txt)]
   gmatch <- regexpr("[[:digit:]\\.]+", input)
   as.numeric(regmatches(input,gmatch))
+}
+
+extract_errors <- function(info){
+  sta_index_start <- grep("## error", info, fixed = TRUE) + 1
+  sta_index_end <- grep("## completed", info, fixed = TRUE) - 1
+  info_list <- list()
+  for(id in seq_along(sta_index_start)){
+    info_list[[id]]  <- info[sta_index_start[id]:sta_index_end[id]]
+  }
+  info_list <- do.call(c, info_list)
+  info_list
+}
+
+extract_statistics <- function(info){
+  sta_index_start <- grep("## Statistics", info, fixed = TRUE) + 1
+  sta_index_end <- grep("## error", info, fixed = TRUE) - 1
+  info_list <- list()
+  for(id in seq_along(sta_index_start)){
+    info_list[[id]]  <- info[sta_index_start[id]:sta_index_end[id]]
+  }
+  info_list <- do.call(c, info_list)
+
+  out <- mapply(
+    FUN = process_log,
+    start = which(info_list %in% "{"),
+    end = which(info_list %in% "}"),
+    MoreArgs = list(txt = info_list),
+    SIMPLIFY = FALSE)
+  out <- Filter(is.data.frame, out)
+  out$stringsAsFactors <- FALSE
+  do.call(rbind, out)
 }
 
 process_data <- function(input = character(), size_in = numeric(),

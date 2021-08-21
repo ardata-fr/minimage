@@ -1,3 +1,46 @@
+minimage_global <- new.env(parent = emptyenv())
+default_minimage_settings <- list(
+  wd = NULL
+)
+minimage_global$defaults <- default_minimage_settings
+
+#' @export
+#' @importFrom utils modifyList
+#' @title Modify minimage defaults settings
+#'
+#' @description The current settings are automatically used to
+#' find compress image utility path for example. This function let you
+#' set the values of these settings.
+#' @param compimg_path compress image node project installed path.
+#' the original project is located at `system.file(package = "minimage", "compress-images")`.
+set_minimage_defaults <- function(compimg_path = NULL){
+  x <- list()
+
+  if( !is.null(compimg_path) ){
+    x$wd <- compimg_path
+  }
+
+  minimage_defaults <- minimage_global$defaults
+
+  minimage_new_defaults <- modifyList(minimage_defaults, x)
+  minimage_global$defaults <- minimage_new_defaults
+  invisible(minimage_defaults)
+}
+
+#' @export
+#' @title Get minimage defaults settings
+#'
+#' @description The current settings are returned by this function.
+#' @return a list containing default values.
+#' @examples
+#' get_minimage_defaults()
+get_minimage_defaults <- function(){
+  x <- minimage_global$defaults
+  class(x) <- "minimage_defaults"
+  x
+}
+
+
 #' @importFrom tools R_user_dir
 working_directory <- function(){
   dir <- R_user_dir(package = "minimage", which = "data")
@@ -12,7 +55,7 @@ working_directory <- function(){
 #' compress_images_available()
 #' @family tools for 'compress-images'
 compress_images_available <- function(){
-  dir.exists(working_directory())
+  dir.exists(get_minimage_defaults()$wd)
 }
 
 #' @export
@@ -31,7 +74,7 @@ compress_images_available <- function(){
 #' @family tools for 'compress-images'
 #' @return a single logical value, TRUE if success.
 compress_images_uninstall <- function(){
-  app_dir <- working_directory()
+  app_dir <- get_minimage_defaults()$wd
   unlink(app_dir, recursive = TRUE, force = TRUE)
   TRUE
 }
@@ -57,7 +100,7 @@ compress_images_install <- function(force = FALSE, verbose = TRUE){
 
   exec_available("npm", error = TRUE)
 
-  app_dir <- working_directory()
+  app_dir <- get_minimage_defaults()$wd
 
   de <- dir.exists(app_dir)
   if(de && !force){

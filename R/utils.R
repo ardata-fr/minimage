@@ -6,3 +6,6 @@ absolute_path <- function(x){
   epath <- normalizePath(epath, "/", mustWork = file.exists(epath))
   epath
 }
+.onLoad <- function(libname, pkgname) {
+  set_minimage_defaults(compimg_path = working_directory())
+}

@@ -1,7 +1,7 @@
 Package: minimage
 Type: Package
 Title: An R Interface to the 'compress-images' Software
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr")
@@ -17,4 +17,3 @@ RoxygenNote: 7.1.1
 Depends: R (>= 4.0.0)
 Imports: tools, locatexec
 SystemRequirements: Node.js
-Remotes: ardata-fr/locatexec

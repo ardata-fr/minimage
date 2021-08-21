@@ -10,6 +10,11 @@ compress_images(INPUT_path_to_your_images, OUTPUT_path, { compress_force: false,
                 { svg: { engine: "svgo", command: "--multipass" } },
                 { gif: { engine: "gifsicle", command: ["--colors", myArgs[5], "--use-col=web"] } },
   function (error, completed, statistic) {
+    console.log("## Statistics");
     console.log(statistic);
+    console.log("## error");
+    console.log(error);
+    console.log("## completed");
+    console.log(completed);
   }
 );
